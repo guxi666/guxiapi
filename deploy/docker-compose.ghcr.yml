@@ -1,0 +1,41 @@
+services:
+  new-api:
+    image: ghcr.io/guxi666/guxiapi:latest
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      - SQL_DSN=root:CHANGE_ME@tcp(mysql:3306)/new-api
+      - REDIS_CONN_STRING=redis://redis
+      - SESSION_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
+      - TZ=Asia/Shanghai
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - baota_net
+
+  redis:
+    image: redis:latest
+    restart: always
+    networks:
+      - baota_net
+
+  mysql:
+    image: mysql:8.2
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=CHANGE_ME
+      - MYSQL_DATABASE=new-api
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - baota_net
+
+networks:
+  baota_net:
+    external: true
